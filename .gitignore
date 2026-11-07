@@ -1,0 +1,146 @@
+
+# ==========================================
+# SAIva - AI University Virtual Receptionist
+# ==========================================
+
+# -------- ENVIRONMENT VARIABLES & SECRETS --------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+service-account.json
+
+# -------- PYTHON --------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# -------- PYTHON VIRTUAL ENVIRONMENTS --------
+venv/
+.venv/
+env/
+ENV/
+virtualenv/
+.python-version
+
+# -------- PYTHON TESTING & COVERAGE --------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+nosetests.xml
+test-results/
+
+# -------- JUPYTER --------
+.ipynb_checkpoints/
+
+# -------- NODE.JS / FRONTEND --------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+.npm/
+.yarn/
+.pnpm-store/
+
+# -------- BUILD OUTPUT --------
+.next/
+.nuxt/
+dist/
+build/
+out/
+.cache/
+.parcel-cache/
+.vite/
+*.tsbuildinfo
+
+# -------- EDITOR & IDE --------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.sublime-workspace
+*.sublime-project
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -------- LOG FILES --------
+*.log
+logs/
+log/
+
+# -------- DATABASE & BACKUPS --------
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.bak
+*.backup
+backups/
+
+# -------- MODEL TRAINING / ML --------
+runs/
+wandb/
+mlruns/
+lightning_logs/
+tensorboard/
+checkpoints/
+*.ckpt
+*.pth
+*.pt
+*.onnx
+*.h5
+*.keras
+*.tflite
+
+# -------- TEMPORARY FILES --------
+*.tmp
+*.temp
+*.swp
+*.swo
+*.orig
+*.old
+*.cache
+
+# -------- DOCKER --------
+.docker/
+docker-data/
+
+# -------- DEPLOYMENT --------
+.vercel/
+.netlify/
+.render/
+.streamlit/secrets.toml
+
+# -------- KEEP REQUIRED PROJECT ASSETS --------
+# Do NOT ignore avatar.glb.
+# Do NOT ignore index.html.
+# Do NOT ignore requirements.txt.
+# Do NOT ignore Dockerfile.
+# Do NOT ignore docker-compose.yml.

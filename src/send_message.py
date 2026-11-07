@@ -1,0 +1,188 @@
+
+import logging
+
+import httpx
+from fastapi import APIRouter
+
+from src.config import settings
+from src.models import (
+    MessageResponse,
+    SendDocumentRequest,
+    SendImageRequest,
+    SendTemplateRequest,
+    SendTextRequest,
+)
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+
+async def _send_whatsapp_message(payload: dict) -> MessageResponse:
+    """
+    Send a message using the WhatsApp Cloud API.
+
+    Args:
+        payload: WhatsApp API message payload.
+
+    Returns:
+        MessageResponse indicating success or failure.
+    """
+
+    if not settings.WHATSAPP_TOKEN or not settings.WHATSAPP_PHONE_NUMBER_ID:
+        logger.error("WhatsApp API credentials are not configured")
+        return MessageResponse(
+            success=False,
+            error="WhatsApp API credentials are not configured",
+        )
+
+    url = f"{settings.BASE_URL}/messages"
+
+    headers = {
+        "Authorization": f"Bearer {settings.WHATSAPP_TOKEN}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                url,
+                headers=headers,
+                json=payload,
+            )
+
+        data = response.json()
+
+        if response.is_success:
+            message_id = data.get("messages", [{}])[0].get("id", "")
+
+            logger.info("Message sent successfully: %s", message_id)
+
+            return MessageResponse(
+                success=True,
+                message_id=message_id,
+            )
+
+        error_msg = data.get("error", {}).get(
+            "message",
+            "Unknown WhatsApp API error",
+        )
+
+        logger.error("WhatsApp API error: %s", error_msg)
+
+        return MessageResponse(
+            success=False,
+            error=error_msg,
+        )
+
+    except httpx.TimeoutException:
+        logger.error("WhatsApp API request timed out")
+
+        return MessageResponse(
+            success=False,
+            error="Request timed out",
+        )
+
+    except httpx.RequestError as e:
+        logger.error("WhatsApp API request error: %s", e)
+
+        return MessageResponse(
+            success=False,
+            error=str(e),
+        )
+
+    except ValueError:
+        logger.error("Invalid JSON response from WhatsApp API")
+
+        return MessageResponse(
+            success=False,
+            error="Invalid response from WhatsApp API",
+        )
+
+
+@router.post("/send-message", response_model=MessageResponse)
+async def send_text_message(payload: SendTextRequest):
+    """Send a text message to a WhatsApp number."""
+
+    data = {
+        "messaging_product": "whatsapp",
+        "to": payload.to,
+        "type": "text",
+        "text": {
+            "body": payload.message,
+        },
+    }
+
+    return await _send_whatsapp_message(data)
+
+
+@router.post("/send-image", response_model=MessageResponse)
+async def send_image_message(payload: SendImageRequest):
+    """Send an image message to a WhatsApp number."""
+
+    image_data = {
+        "link": payload.image_url,
+    }
+
+    if payload.caption:
+        image_data["caption"] = payload.caption
+
+    data = {
+        "messaging_product": "whatsapp",
+        "to": payload.to,
+        "type": "image",
+        "image": image_data,
+    }
+
+    return await _send_whatsapp_message(data)
+
+
+@router.post("/send-document", response_model=MessageResponse)
+async def send_document_message(payload: SendDocumentRequest):
+    """Send a document message to a WhatsApp number."""
+
+    doc_data = {
+        "link": payload.document_url,
+    }
+
+    if payload.filename:
+        doc_data["filename"] = payload.filename
+
+    if payload.caption:
+        doc_data["caption"] = payload.caption
+
+    data = {
+        "messaging_product": "whatsapp",
+        "to": payload.to,
+        "type": "document",
+        "document": doc_data,
+    }
+
+    return await _send_whatsapp_message(data)
+
+
+@router.post("/send-template", response_model=MessageResponse)
+async def send_template_message(payload: SendTemplateRequest):
+    """Send a template message to a WhatsApp number."""
+
+    template_data = {
+        "name": payload.template_name,
+        "language": {
+            "code": payload.language_code,
+        },
+    }
+
+    if payload.components:
+        template_data["components"] = [
+            component.model_dump()
+            for component in payload.components
+        ]
+
+    data = {
+        "messaging_product": "whatsapp",
+        "to": payload.to,
+        "type": "template",
+        "template": template_data,
+    }
+
+    return await _send_whatsapp_message(data)
