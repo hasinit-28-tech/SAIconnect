@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sai University | AI Virtual Assistant</title>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #eef2f7;
+  color: #172338;
+  min-height: 100vh;
+}
+
+button, input {
+  font-family: inherit;
+}
+
+header {
+  background: #101c2d;
+  color: white;
+  padding: 18px 35px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #c8a66b;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e8c98f;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.brand h2 {
+  font-size: 17px;
+  letter-spacing: 2px;
+}
+
+.brand p {
+  font-size: 11px;
+  margin-top: 5px;
+  color: #b7c4d4;
+}
+
+.online {
+  color: #55d6a4;
+  font-size: 13px;
+}
+
+.container {
+  max-width: 1250px;
+  margin: 30px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #e1e8f0;
+  box-shadow: 0 10px 35px rgba(20, 40, 70, 0.06);
+}
+
+.card-header {
+  padding: 21px;
+  border-bottom: 1px solid #e5eaf0;
+}
+
+.eyebrow {
+  color: #c7a66b;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.card-header h3 {
+  font-size: 20px;
+}
+
+.avatar-area {
+  min-height: 590px;
+  background: radial-gradient(circle at center, #ffffff 0%, #f4f7fa 65%, #edf1f6 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  position: relative;
+}
+
+.welcome {
+  background: white;
+  padding: 15px 22px;
+  border-radius: 16px;
+  text-align: center;
+  line-height: 1.8;
+  font-size: 14px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+  position: relative;
+  z-index: 2;
+}
+
+.welcome strong {
+  color: #173c60;
+}
+
+#avatarStage {
+  width: 100%;
+  max-width: 450px;
+  height: 400px;
+  position: relative;
+}
+
+#avatarCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+}
+
+#avatarLoading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #758398;
+  font-size: 14px;
+  pointer-events: none;
+  text-align: center;
+  padding: 20px;
+}
+
+.avatar-note {
+  color: #8995a5;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.speak-btn {
+  background: #101c2d;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 23px;
+  margin-top: 18px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.speak-btn:hover {
+  background: #254768;
+  transform: translateY(-2px);
+}
+
+.chat-card {
+  min-height: 590px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-status {
+  color: #15977f;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+#messages {
+  flex: 1;
+  min-height: 350px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.message {
+  max-width: 88%;
+  padding: 13px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.bot {
+  align-self: flex-start;
+  background: #f0f4f8;
+  color: #273c53;
+}
+
+.user {
+  align-self: flex-end;
+  background: #173c60;
+  color: white;
+}
+
+.quick {
+  padding: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.quick button {
+  background: white;
+  color: #34516d;
+  border: 1px solid #dce4ed;
+  border-radius: 25px;
+  padding: 9px 13px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.quick button:hover {
+  background: #edf3f8;
+}
+
+.composer {
+  padding: 16px;
+  border-top: 1px solid #e5eaf1;
+  display: flex;
+  gap: 10px;
+}
+
+.composer input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #dce4ec;
+  border-radius: 12px;
+  outline: none;
+}
+
+.composer input:focus {
+  border-color: #168a83;
+}
+
+.composer button {
+  background: #168a83;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+.composer button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+footer {
+  text-align: center;
+  padding: 22px;
+  color: #8995a5;
+  font-size: 12px;
+}
+
+@media(max-width: 850px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+
+  .avatar-area {
+    min-height: 540px;
+  }
+}
+
+@media(max-width: 480px) {
+  header {
+    padding: 14px;
+  }
+
+  .brand h2 {
+    font-size: 13px;
+  }
+
+  .container {
+    padding: 0 10px;
+  }
+
+  #avatarStage {
+    height: 350px;
+  }
+
+  .avatar-area {
+    padding: 15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">SU</div>
+    <div>
+      <h2>SAI UNIVERSITY</h2>
+      <p>STUDENT SUPPORT ASSISTANT</p>
+    </div>
+  </div>
+
+  <div class="online">
+    ● AI Assistant
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <div class="card-header">
+      <div class="eyebrow">
+        YOUR DIGITAL REPRESENTATIVE
+      </div>
+      <h3>Meet Your AI Assistant</h3>
+    </div>
+
+    <div class="avatar-area">
+      <div class="welcome">
+        <strong>Hi! Welcome to Sai University.</strong>
+        <br>
+        I'm your AI assistant.
+        How can I help you today?
+      </div>
+
+      <div id="avatarStage">
+        <canvas id="avatarCanvas"></canvas>
+        <div id="avatarLoading">
+          Loading your university assistant...
+        </div>
+      </div>
+
+      <div class="avatar-note">
+        Professional University Representative
+        · SAI UNIVERSITY
+      </div>
+
+      <button class="speak-btn" id="speakGreeting">
+        ▶ Hear Welcome Greeting
+      </button>
+    </div>
+  </section>
+
+  <section class="card chat-card">
+    <div class="card-header">
+      <div class="eyebrow">ASK US ANYTHING</div>
+      <h3>Chat with Sai University AI</h3>
+      <div class="chat-status" id="chatStatus">
+        Ready to chat
+      </div>
+    </div>
+
+    <div id="messages">
+      <div class="message bot">
+        Hi there! 👋
+        Welcome to Sai University.
+        I am your AI assistant.
+        I can help you with admissions,
+        courses, eligibility, fees and
+        university information.
+        What would you like to know?
+      </div>
+    </div>
+
+    <div style="padding:12px 16px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <label for="languageSelect" style="font-size:13px;color:#34516d;font-weight:600;">
+        Response language:
+      </label>
+
+      <select id="languageSelect" style="padding:9px 12px;border:1px solid #dce4ed;border-radius:10px;background:white;color:#273c53;">
+        <option value="en" selected>English</option>
+        <option value="ta">தமிழ் (Tamil)</option>
+        <option value="te">తెలుగు (Telugu)</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        <option value="ml">മലയാളം (Malayalam)</option>
+      </select>
+    </div>
+
+    <div class="quick">
+      <button data-question="What courses are available?">Courses</button>
+      <button data-question="How can I apply for admission?">Admissions</button>
+      <button data-question="What are the eligibility requirements?">Eligibility</button>
+      <button data-question="How can I contact the university?">Contact</button>
+    </div>
+
+    <form class="composer" id="chatForm">
+      <input
+        id="messageInput"
+        placeholder="Type your message..."
+        autocomplete="off"
+        required
+      >
+      <button id="sendButton" type="submit">
+        Send ➤
+      </button>
+    </form>
+  </section>
+
+</main>
+
+<footer>
+  SAI UNIVERSITY · AI STUDENT SUPPORT SYSTEM
+</footer>
+
+<!-- CHATBOT JAVASCRIPT -->
+
+<script>
+const API_BASE_URL = "http://127.0.0.1:8000";
+const CHAT_ENDPOINT = "/chat";
+
+const messages = document.getElementById("messages");
+const input = document.getElementById("messageInput");
+const sendButton = document.getElementById("sendButton");
+const chatStatus = document.getElementById("chatStatus");
+const languageSelect = document.getElementById("languageSelect");
+
+const languageSettings = {
+  en: { name: "English", locale: "en-IN" },
+  ta: { name: "Tamil", locale: "ta-IN" },
+  te: { name: "Telugu", locale: "te-IN" },
+  hi: { name: "Hindi", locale: "hi-IN" },
+  kn: { name: "Kannada", locale: "kn-IN" },
+  ml: { name: "Malayalam", locale: "ml-IN" }
+};
+
+function getSelectedLanguage() {
+  return languageSettings[languageSelect.value] || languageSettings.en;
+}
+
+function addMessage(text, type) {
+  const bubble = document.createElement("div");
+  bubble.className = `message ${type}`;
+  bubble.textContent = text;
+  messages.appendChild(bubble);
+  messages.scrollTop = messages.scrollHeight;
+  return bubble;
+}
+
+async function sendMessage(text) {
+  const message = text.trim();
+  if (!message) return;
+
+  addMessage(message, "user");
+  input.value = "";
+  sendButton.disabled = true;
+  chatStatus.textContent = "Thinking...";
+
+  const waiting = addMessage(
+    "Please wait, I'm finding the information...",
+    "bot"
+  );
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}${CHAT_ENDPOINT}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message:
+            `Reply in ${getSelectedLanguage().name}. ` +
+            `Keep the answer short, clear and student-friendly. ` +
+            `Use simple words and give only the important points. ` +
+            `Limit the answer to 2-4 short sentences or a maximum of 60 words. ` +
+            `If the question needs steps, use a short numbered list. ` +
+            `Do not add unnecessary introductions.\n\n` +
+            `Student's question: ${message}`
+        })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Backend error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const reply =
+      data.reply ||
+      data.response ||
+      data.answer ||
+      data.message;
+
+    if (!reply) {
+      throw new Error("No response received from backend");
+    }
+
+    waiting.remove();
+    addMessage(reply, "bot");
+    chatStatus.textContent = "Connected";
+
+    if (window.SAIAvatar) {
+      window.SAIAvatar.speak(reply);
+    }
+
+  } catch(error) {
+    waiting.remove();
+
+    addMessage(
+      "Sorry! I cannot connect to the AI service right now. Please try again.",
+      "bot"
+    );
+
+    chatStatus.textContent = "Connection error";
+    console.error("Chat error:", error);
+
+  } finally {
+    sendButton.disabled = false;
+    input.focus();
+  }
+}
+
+document
+  .getElementById("chatForm")
+  .addEventListener("submit", function(event) {
+    event.preventDefault();
+    sendMessage(input.value);
+  });
+
+document
+  .querySelectorAll("[data-question]")
+  .forEach(button => {
+    button.addEventListener("click", () => {
+      sendMessage(button.dataset.question);
+    });
+  });
+
+async function speak(text) {
+  if (!("speechSynthesis" in window)) {
+    alert("Speech is not supported in this browser.");
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  let voices = window.speechSynthesis.getVoices();
+
+  if (voices.length === 0) {
+    await new Promise(resolve => {
+      const timeout = setTimeout(resolve, 2000);
+
+      window.speechSynthesis.addEventListener(
+        "voiceschanged",
+        () => {
+          clearTimeout(timeout);
+          resolve();
+        },
+        { once: true }
+      );
+    });
+
+    voices = window.speechSynthesis.getVoices();
+  }
+
+  console.log("AVAILABLE VOICES:", voices.map(v => v.name));
+
+  const language = getSelectedLanguage();
+
+  const languageVoices = voices.filter(voice =>
+    voice.lang.toLowerCase().startsWith(language.locale.slice(0, 2))
+  );
+
+  const selectedVoice =
+    languageVoices.find(voice =>
+      /female|heera|neerja|zira|samantha|aria|jenny|susan|google.*female/i.test(voice.name)
+    ) || languageVoices[0];
+
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = language.locale;
+
+  if (selectedVoice) {
+    speech.voice = selectedVoice;
+    speech.lang = selectedVoice.lang;
+    console.log("SELECTED VOICE:", selectedVoice.name);
+  } else {
+    console.warn(`No ${language.name} voice is installed.`);
+  }
+
+  speech.rate = 0.92;
+  speech.pitch = 1.12;
+  speech.volume = 1;
+
+  speech.onstart = () => setSpeaking(true);
+
+  speech.onend = () => {
+    setSpeaking(false);
+    setMorphTarget("jawOpen", 0);
+  };
+
+  speech.onerror = () => {
+    setSpeaking(false);
+    setMorphTarget("jawOpen", 0);
+  };
+
+  window.speechSynthesis.speak(speech);
+}
+
+document
+  .getElementById("speakGreeting")
+  .addEventListener("click", () => {
+
+    const greetings = {
+      en: "Hi! Welcome to Sai University. I am your AI assistant. How can I help you today?",
+      ta: "வணக்கம்! சாய் பல்கலைக்கழகத்திற்கு வரவேற்கிறோம். நான் உங்கள் AI உதவியாளர். உங்களுக்கு எப்படி உதவலாம்?",
+      te: "నమస్కారం! సాయి విశ్వవిద్యాలయానికి స్వాగతం. నేను మీ AI సహాయకురాలిని. మీకు ఎలా సహాయం చేయగలను?",
+      hi: "नमस्ते! साई यूनिवर्सिटी में आपका स्वागत है। मैं आपकी AI सहायक हूँ। मैं आपकी कैसे मदद कर सकती हूँ?",
+      kn: "ನಮಸ್ಕಾರ! ಸಾಯಿ ವಿಶ್ವವಿದ್ಯಾಲಯಕ್ಕೆ ಸ್ವಾಗತ. ನಾನು ನಿಮ್ಮ AI ಸಹಾಯಕಿ. ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
+      ml: "നമസ്കാരം! സായി സർവകലാശാലയിലേക്ക് സ്വാഗതം. ഞാൻ നിങ്ങളുടെ AI സഹായി ആണ്. എങ്ങനെ സഹായിക്കാം?"
+    };
+
+    speak(greetings[languageSelect.value] || greetings.en);
+  });
+</script>
+<!-- THREE JS AVATAR -->
+
+<script type="module">
+
+import * as THREE from "three";
+
+import {
+    GLTFLoader
+} from "three/addons/loaders/GLTFLoader.js";
+
+const stage = document.getElementById("avatarStage");
+const canvas = document.getElementById("avatarCanvas");
+const loading = document.getElementById("avatarLoading");
+
+/* SCENE */
+
+const scene = new THREE.Scene();
+
+/* CAMERA */
+
+const camera = new THREE.PerspectiveCamera(
+    35,
+    1,
+    0.1,
+    100
+);
+
+camera.position.set(0, 0.1, 5);
+camera.lookAt(0, 0, 0);
+
+/* RENDERER */
+
+const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    alpha: true,
+    antialias: true
+});
+
+renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, 2)
+);
+
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+/* LIGHTING */
+
+scene.add(
+    new THREE.HemisphereLight(
+        0xffffff,
+        0x8493a5,
+        2
+    )
+);
+
+const mainLight = new THREE.DirectionalLight(
+    0xffffff,
+    2.5
+);
+
+mainLight.position.set(3, 5, 5);
+scene.add(mainLight);
+
+const fillLight = new THREE.DirectionalLight(
+    0xc5d9ff,
+    1.3
+);
+
+fillLight.position.set(-4, 2, 3);
+scene.add(fillLight);
+
+const backLight = new THREE.DirectionalLight(
+    0xffffff,
+    1.5
+);
+
+backLight.position.set(0, 3, -4);
+scene.add(backLight);
+
+/* AVATAR GROUP */
+
+const avatar = new THREE.Group();
+scene.add(avatar);
+
+/* RESPONSIVE RESIZE */
+
+function resizeAvatar() {
+    const width = stage.clientWidth;
+    const height = stage.clientHeight;
+
+    if (!width || !height) return;
+
+    renderer.setSize(width, height, false);
+
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+}
+
+const resizeObserver = new ResizeObserver(resizeAvatar);
+resizeObserver.observe(stage);
+
+resizeAvatar();
+
+/* AVATAR ANIMATION VARIABLES */
+
+const clock = new THREE.Clock();
+
+let avatarModel = null;
+let morphTargets = [];
+let headBone = null;
+let neckBone = null;
+
+let isSpeaking = false;
+let speakingUntil = 0;
+
+/* LOAD AVATAR */
+
+const loader = new GLTFLoader();
+
+const avatarURL = new URL("./avatar.glb", import.meta.url).href;
+
+loader.load(
+    avatarURL,
+
+    function (gltf) {
+
+        console.log("Avatar downloaded successfully.");
+
+        avatarModel = gltf.scene;
+        avatar.clear();
+
+        /* RESET MODEL TRANSFORM */
+
+        avatarModel.position.set(0, 0, 0);
+        avatarModel.rotation.set(0, 0, 0);
+        avatarModel.scale.set(1, 1, 1);
+
+        /* FIND MODEL DIMENSIONS */
+
+        const originalBox = new THREE.Box3().setFromObject(avatarModel);
+
+        const originalSize = originalBox.getSize(
+            new THREE.Vector3()
+        );
+
+        const originalCenter = originalBox.getCenter(
+            new THREE.Vector3()
+        );
+
+        console.log("Original model dimensions:", originalSize);
+
+        if (
+            originalSize.x <= 0 ||
+            originalSize.y <= 0 ||
+            originalSize.z <= 0
+        ) {
+
+            loading.textContent =
+                "The avatar model has invalid dimensions.";
+
+            return;
+        }
+
+        /* SCALE MODEL */
+
+        const targetHeight = 3.0;
+
+        const scale = targetHeight / originalSize.y;
+
+        avatarModel.scale.setScalar(scale);
+
+        /* CENTER MODEL */
+
+        const scaledBox = new THREE.Box3().setFromObject(avatarModel);
+
+        const scaledCenter = scaledBox.getCenter(
+            new THREE.Vector3()
+        );
+
+        avatarModel.position.sub(scaledCenter);
+
+        /* FIND FACE MORPH TARGETS AND BONES */
+
+        morphTargets = [];
+
+        avatarModel.traverse((object) => {
+
+            if (object.isMesh && object.morphTargetDictionary) {
+
+                morphTargets.push(object);
+
+                console.log(
+                    "Facial morph targets:",
+                    Object.keys(object.morphTargetDictionary)
+                );
+            }
+
+            if (object.isBone) {
+
+                console.log("AVATAR BONE:", object.name);
+
+                const boneName = object.name.toLowerCase();
+
+                if (
+                    boneName.includes("head") &&
+                    !headBone
+                ) {
+                    headBone = object;
+                }
+
+                if (
+                    boneName.includes("neck") &&
+                    !neckBone
+                ) {
+                    neckBone = object;
+                }
+            }
+        });
+
+        /* ADD AVATAR */
+
+        avatar.add(avatarModel);
+
+        /* CAMERA POSITION */
+
+        const finalBox = new THREE.Box3().setFromObject(avatar);
+
+        const finalSize = finalBox.getSize(
+            new THREE.Vector3()
+        );
+
+        const maxDimension = Math.max(
+            finalSize.x,
+            finalSize.y,
+            finalSize.z
+        );
+
+        const fovRadians = camera.fov * Math.PI / 180;
+
+        const distance =
+            (maxDimension / 2) /
+            Math.tan(fovRadians / 2);
+
+        camera.position.set(
+            0,
+            0.1,
+            Math.max(distance * 1.5, 5)
+        );
+
+        camera.lookAt(0, 0, 0);
+
+        /* HIDE LOADING MESSAGE */
+
+        loading.style.display = "none";
+
+        console.log("Sai University avatar loaded successfully!");
+
+    },
+
+    /* LOADING PROGRESS */
+
+    function (progress) {
+
+        if (progress.total > 0) {
+
+            const percentage = Math.round(
+                progress.loaded / progress.total * 100
+            );
+
+            loading.textContent =
+                "Loading avatar... " + percentage + "%";
+        }
+    },
+
+    /* LOADING ERROR */
+
+    function (error) {
+
+        console.error("GLB loading failed:", error);
+
+        loading.style.display = "flex";
+
+        loading.textContent =
+            "Avatar could not load. Check avatar.glb and the browser Console.";
+    }
+);
+
+/* FACIAL EXPRESSION HELPER */
+
+function setMorphTarget(name, value) {
+
+    morphTargets.forEach((mesh) => {
+
+        const index = mesh.morphTargetDictionary[name];
+
+        if (index !== undefined) {
+
+            mesh.morphTargetInfluences[index] = value;
+        }
+    });
+}
+
+/* SPEAKING CONTROL */
+
+function setSpeaking(value) {
+
+    isSpeaking = value;
+
+    if (value) {
+        speakingUntil = performance.now() + 500;
+    }
+}
+
+/* SPEAKING WITH VOICE */
+
+async function speak(text) {
+
+    if (!("speechSynthesis" in window)) {
+        console.warn("Speech is not supported in this browser.");
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    let voices = window.speechSynthesis.getVoices();
+
+    if (voices.length === 0) {
+
+        await new Promise(resolve => {
+
+            const timeout = setTimeout(resolve, 2000);
+
+            window.speechSynthesis.addEventListener(
+                "voiceschanged",
+                () => {
+                    clearTimeout(timeout);
+                    resolve();
+                },
+                { once: true }
+            );
+        });
+
+        voices = window.speechSynthesis.getVoices();
+    }
+
+    const language = getSelectedLanguage();
+
+    const languageVoices = voices.filter(voice =>
+        voice.lang.toLowerCase().startsWith(language.locale.slice(0, 2))
+    );
+
+    const selectedVoice =
+        languageVoices.find(voice =>
+            /female|heera|neerja|zira|samantha|aria|jenny|susan|google.*female/i.test(voice.name)
+        ) || languageVoices[0];
+
+    const speech = new SpeechSynthesisUtterance(text);
+
+    speech.lang = language.locale;
+
+    if (selectedVoice) {
+    speech.voice = selectedVoice;
+    speech.lang = selectedVoice.lang;
+
+    console.log("SELECTED VOICE:", selectedVoice.name, selectedVoice.lang);
+} else {
+    console.warn(`No ${language.name} voice is installed.`);
+}
+
+speech.rate = 0.92;
+speech.pitch = 1.12;
+speech.volume = 1;
+
+speech.onstart = () => setSpeaking(true);
+
+speech.onend = () => {
+    setSpeaking(false);
+    setMorphTarget("jawOpen", 0);
+};
+
+speech.onerror = () => {
+    setSpeaking(false);
+    setMorphTarget("jawOpen", 0);
+};
+
+window.speechSynthesis.cancel();
+window.speechSynthesis.speak(speech);
+}
+
+/* SMILE */
+
+function smile() {
+
+    setMorphTarget("mouthSmileLeft", 0.45);
+    setMorphTarget("mouthSmileRight", 0.45);
+
+    setTimeout(() => {
+
+        setMorphTarget("mouthSmileLeft", 0);
+        setMorphTarget("mouthSmileRight", 0);
+
+    }, 1800);
+}
+
+/* MAKE AVATAR FUNCTIONS AVAILABLE TO CHATBOT */
+
+window.SAIAvatar = {
+    speak,
+    setSpeaking,
+    smile
+};
+
+/* GREETING BUTTON */
+
+/* ANIMATION LOOP */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    const elapsed = clock.getElapsedTime();
+    const now = performance.now();
+
+    /* NATURAL BODY MOVEMENT */
+
+    avatar.position.y = Math.sin(elapsed * 1.3) * 0.015;
+    avatar.rotation.y = Math.sin(elapsed * 0.4) * 0.035;
+
+    /* NATURAL HEAD MOVEMENT */
+
+    if (headBone) {
+
+        headBone.rotation.y =
+            Math.sin(elapsed * 0.6) * 0.035;
+
+        headBone.rotation.x =
+            Math.sin(elapsed * 0.8) * 0.015;
+    }
+
+    if (neckBone) {
+
+        neckBone.rotation.x =
+            Math.sin(elapsed * 0.7) * 0.012;
+    }
+
+    /* NATURAL BLINKING */
+
+    const blinkCycle = elapsed % 4.5;
+
+    const blinkValue =
+        blinkCycle > 4.35
+            ? Math.sin(
+                ((blinkCycle - 4.35) / 0.15) * Math.PI
+            )
+            : 0;
+
+    setMorphTarget("eyeBlinkLeft", blinkValue);
+    setMorphTarget("eyeBlinkRight", blinkValue);
+
+    /* NATURAL JAW AND LIP MOVEMENT */
+
+    if (isSpeaking || now < speakingUntil) {
+
+        const speechWave = Math.abs(Math.sin(elapsed * 9));
+
+        const jawMovement =
+            0.08 + speechWave * 0.38;
+
+        setMorphTarget("jawOpen", jawMovement);
+
+        setMorphTarget(
+            "mouthFunnel",
+            Math.max(0, Math.sin(elapsed * 5)) * 0.25
+        );
+
+        setMorphTarget(
+            "mouthPucker",
+            Math.max(0, Math.sin(elapsed * 7 + 1)) * 0.18
+        );
+
+        setMorphTarget(
+            "mouthLowerDownLeft",
+            speechWave * 0.2
+        );
+
+        setMorphTarget(
+            "mouthLowerDownRight",
+            speechWave * 0.2
+        );
+
+        setMorphTarget("mouthSmileLeft", 0.12);
+        setMorphTarget("mouthSmileRight", 0.12);
+
+    } else {
+
+        setMorphTarget("jawOpen", 0);
+        setMorphTarget("mouthFunnel", 0);
+        setMorphTarget("mouthPucker", 0);
+        setMorphTarget("mouthLowerDownLeft", 0);
+        setMorphTarget("mouthLowerDownRight", 0);
+        setMorphTarget("mouthSmileLeft", 0);
+        setMorphTarget("mouthSmileRight", 0);
+    }
+
+    /* RENDER */
+
+    renderer.render(scene, camera);
+}
+
+animate();
+
+/* ERROR HANDLING */
+
+window.addEventListener("unhandledrejection", (event) => {
+
+    console.error("Three.js error:", event.reason);
+
+    loading.style.display = "flex";
+
+    loading.textContent =
+        "Avatar initialization failed. Check browser Console.";
+});
+
+</script>
